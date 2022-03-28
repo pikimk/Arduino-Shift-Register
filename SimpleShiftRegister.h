@@ -13,13 +13,14 @@ class ShiftRegister{
 	
 	private:
 		
-		const short SIZE_OF_ARRAY = 8;
+		int SIZE_OF_ARRAY;
 		short pinClock, pinData, pinLatch, clearRegisterPin;
 		bool latch = false;
+    short numberOfShiftRegisters;
 		
 		// it takes 8 bytes since one boolean variable is 1 byte
 		// using calloc to set all mem blocks to 0
-		bool* bitArray = (bool*)calloc(SIZE_OF_ARRAY, sizeof(bool));
+		bool* bitArray; 
 
    
     void latchUp(){
@@ -80,13 +81,19 @@ class ShiftRegister{
     }
 
 		
-		ShiftRegister(short pinClock, short pinData, short pinLatch, short clearRegisterPin){
+		ShiftRegister(short pinClock, short pinData, short pinLatch, short clearRegisterPin, short numberOfShiftRegisters = 1){
 			
 			this->pinClock = pinClock;
 			this->pinData = pinData;
 			this->pinLatch = pinLatch;
       this->clearRegisterPin = clearRegisterPin;
-      init();
+
+      numberOfShiftRegisters < 1 ? this->numberOfShiftRegisters = 1 : this->numberOfShiftRegisters = numberOfShiftRegisters;
+
+      SIZE_OF_ARRAY = this->numberOfShiftRegisters * 8;
+
+      bitArray = (bool*)calloc(SIZE_OF_ARRAY, sizeof(bool));
+
 		}
 		
 
@@ -114,11 +121,23 @@ class ShiftRegister{
     void execute(){
       writeArrayToRegister(true);
     }
+
+    //returns the size of pins declared ex. 3 registers * 8 pins = 24 pins.
+    int getSize(){
+      return SIZE_OF_ARRAY;
+    }
 	
 	
 	//overload the  [] operator to manipulate bits;
 	 bool& operator[](int a){
-		  return bitArray[a];
+
+     if (a < SIZE_OF_ARRAY){
+       return bitArray[a];
+     }else{
+       bool *ref = nullptr;
+       return *ref;
+     }
+		  
     }
 
 	

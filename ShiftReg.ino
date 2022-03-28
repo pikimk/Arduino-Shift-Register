@@ -6,8 +6,15 @@
 #define DATA_PIN 2
 #define LATCH_PIN 3
 #define CLEAR_REGISTER_PIN 5
+#define NUMBER_OF_SERIAL_ICS 3 // ex. if we want to connect 3 shift registers in series 
 
-ShiftRegister reg(CLOCK_PIN, DATA_PIN, LATCH_PIN, CLEAR_REGISTER_PIN);
+//connecting 2 or more shift registers in series:
+// QH' is the serial out pin and it connects to the data pin on the next shift register
+// connect the clock pin, lathc pin and clear register in paralel with all the shift registerss
+
+ShiftRegister reg(CLOCK_PIN, DATA_PIN, LATCH_PIN, CLEAR_REGISTER_PIN, NUMBER_OF_SERIAL_ICS);
+
+// if you are declaring only one shift registr, you dont have to pass the NUMBER_OF_SERIAL_ICS value to the constructor
 
 void setup(){
   Serial.begin(115200);
@@ -17,29 +24,24 @@ void setup(){
 
 void loop(){
 
-  reg.writeToRegister(10); //writes the value 10 in binary into the register 00001010
-  delay(1000);
-  Serial.println(reg.getValue()); // prints the current value in  the register  ex. 10
-  //reg.getValue() returns int with the current value of the register
+  for(int i = 0; i<reg.getSize(); i++){
+    reg[i] = true;
+    reg.execute();
+    delay(30);
+    reg[i] = false;
+    reg.execute();
+    delay(30);
+  }
 
-  reg[3] = false; // setting the third bit of the register true or false and you must use .execute();
-  reg.execute(); //when you use [ ] to output the changed values of bit array into register
-  delay(1000);
+  for(int i = reg.getSize()- 1; i>0; i--){
+    reg[i] = true;
+    reg.execute();
+    delay(30);
+    reg[i] = false;
+    reg.execute();
+    delay(30);
+  }
 
-  reg[4] = !reg[4]; // toogle the 4 bit of the register
-  reg.execute(); 
-  delay(1000);
-
-  Serial.println(reg.getValue());
-  delay(1000);
-
-  reg[0] = true; //  
-  reg[1] = true; //  THE VALUE IS STILL CHANGED WITHOUT THE .execute() METHOD
-  reg[2] = true; //
-  reg[3] = true; //
-
-  Serial.println(reg.getValue());
-  delay(1000);
-  reg.execute();
-
+  Serial.println(reg.getSize());
+ 
 }
